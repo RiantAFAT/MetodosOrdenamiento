@@ -16,7 +16,7 @@ public class GraficoOrdenamiento extends JFrame{
     public static void main(String args[]){
         Scanner scanner = new Scanner(System.in);
         long[] data= new long[7];
-        int arreglo[]= new int[8];
+        int arreglo[]= new int[1000000];
 
         int opc= 3444;
         while(opc != 0) {
@@ -33,20 +33,20 @@ public class GraficoOrdenamiento extends JFrame{
                                 "9.) Grafico de barras(Una vez se ejecuten todos los metodos)\n");
             opc = scanner.nextInt();
 
-            String z="";
+            /*String z="";
             for (int elemento : arreglo) {
                 z= z + elemento + "\t" ;
 
             }
             System.out.println("Arreglo sin ordenar:\n");
-            System.out.println(z + "\n");
+            System.out.println(z + "\n");*/
             long startTime = 0, endTime = 0, executionTime= 0;
             switch (opc) {
                 case 1:
                     TimSort timsort;
                     timsort = new TimSort();
                     startTime = System.currentTimeMillis();
-                    timsort.timSort(arreglo);
+                    timsort.timSort(arreglo, arreglo.length);
                     endTime = System.currentTimeMillis();
                     executionTime = endTime - startTime;
                     System.out.println("El tiempo de ejecución de TimSort fue de: " + executionTime + " milisegundos");
@@ -114,7 +114,7 @@ public class GraficoOrdenamiento extends JFrame{
                     gnomeSort.gnomeSort(arreglo);
                     endTime = System.currentTimeMillis();
                     executionTime = endTime - startTime;
-                    System.out.println("El tiempo de ejecución de BitonicSort fue de: " + executionTime + " milisegundos");
+                    System.out.println("El tiempo de ejecución de GnomeSort fue de: " + executionTime + " milisegundos");
                     data[6] = executionTime;
                     break;
 
@@ -122,7 +122,7 @@ public class GraficoOrdenamiento extends JFrame{
                     SwingUtilities.invokeLater(() -> new GraficoOrdenamiento("Grafico de Barras con Datos Long", data));
 
             }
-            if(opc != 0 && opc != 3 && opc != 9){
+            /*if(opc != 0 && opc != 3 && opc != 9){
                 //imprimir arreglo de prueba ordenado
                 String t="";
                 for (int elemento : arreglo) {
@@ -131,7 +131,7 @@ public class GraficoOrdenamiento extends JFrame{
                 }
                 System.out.println("Arreglo ordenado:\n");
                 System.out.println(t);
-            }
+            }*/
         }
         scanner.close();
 

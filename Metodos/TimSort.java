@@ -1,118 +1,158 @@
 package Metodos;
 
-import java.util.Arrays;
+// This code has been contributed by 29AjayKumar
+//Tomado de: https://www.geeksforgeeks.org/timsort/?ref=shm
 
-//Tomado de: https://github.com/argonautica/sorting-algorithms/blob/master/Java/TimSort.java
+public class TimSort {
+    static int MIN_MERGE = 32;
 
+    public static int minRunLength(int n)
+    {
+        assert n >= 0;
 
-/**
- * This class holds an example for a Tim-Sort implementation with a main as an
- * example.
- *
- *
- * Timsort is a hybrid stable sorting algorithm, derived from merge sort and
- * insertion sort, designed to perform well on many kinds of real-world data.
- * Timsort was designed to take advantage of runs of consecutive ordered
- * elements that already exist in most real-world data, natural runs. It
- * iterates over the data collecting elements into runs, and simultaneously
- * merging those runs together. When there are runs, doing this decreases the
- * total number of comparisons needed to fully sort the list.
- *
- *
- * We divide the Array into blocks known as Run. We sort those runs using insertion sort 
- * one by one and then merge those runs using combine function used in merge sort. 
- * If the size of Array is less than run, then Array get sorted just by using Insertion Sort. 
- * The size of run may vary from 32 to 64 depending upon the size of the array. 
- * Note that merge function performs well when sizes subarrays are powers of 2. 
- * The idea is based on the fact that insertion sort performs well for small arrays.
- */
+        // Becomes 1 if any 1 bits are shifted off
+        int r = 0;
+        while (n >= MIN_MERGE) {
+            r |= (n & 1);
+            n >>= 1;
+        }
+        return n + r;
+    }
 
-public final class TimSort {
+    // This function sorts array from left index to
+    // to right index which is of size atmost RUN
+    public static void insertionSort(int[] arr, int left,
+                                     int right)
+    {
+        for (int i = left + 1; i <= right; i++) {
+            int temp = arr[i];
+            int j = i - 1;
+            while (j >= left && arr[j] > temp) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            arr[j + 1] = temp;
+        }
+    }
 
-	static int RUN = 32;
+    // Merge function merges the sorted runs
+    public static void merge(int[] arr, int l, int m, int r)
+    {
+        // Original array is broken in two parts
+        // left and right array
+        int len1 = m - l + 1, len2 = r - m;
+        int[] left = new int[len1];
+        int[] right = new int[len2];
+        for (int x = 0; x < len1; x++) {
+            left[x] = arr[l + x];
+        }
+        for (int x = 0; x < len2; x++) {
+            right[x] = arr[m + 1 + x];
+        }
 
-	// this function sorts array from left index to
-	// to right index which is of size atmost THREASHOLD
-	public static void insertionSort(int[] arr, int left, int right) {
-		for (int i = left + 1; i <= right; i++) {
-			int temp = arr[i];
-			int j = i - 1;
-			while (j >= 0 && arr[j] > temp && j >= left) {
-				arr[j + 1] = arr[j];
-				j--;
-			}
-			arr[j + 1] = temp;
-		}
-	}
+        int i = 0;
+        int j = 0;
+        int k = l;
 
-	// merge function merges the sorted runs
-	public static void merge(int[] arr, int left, int mid, int right) {
+        // After comparing, we merge those two array
+        // in larger sub array
+        while (i < len1 && j < len2) {
+            if (left[i] <= right[j]) {
+                arr[k] = left[i];
+                i++;
+            }
+            else {
+                arr[k] = right[j];
+                j++;
+            }
+            k++;
+        }
 
-		int leftArryLen = mid - left + 1, rightArrLen = right - mid;
-		int[] leftArr = new int[leftArryLen];
-		int[] rightArr = new int[rightArrLen];
+        // Copy remaining elements
+        // of left, if any
+        while (i < len1) {
+            arr[k] = left[i];
+            k++;
+            i++;
+        }
 
-		for (int x = 0; x < leftArryLen; x++) {
-			leftArr[x] = arr[left + x];
-		}
+        // Copy remaining element
+        // of right, if any
+        while (j < len2) {
+            arr[k] = right[j];
+            k++;
+            j++;
+        }
+    }
 
-		for (int x = 0; x < rightArrLen; x++) {
-			rightArr[x] = arr[mid + 1 + x];
-		}
+    // Iterative Timsort function to sort the
+    // array[0...n-1] (similar to merge sort)
+    public static void timSort(int[] arr, int n)
+    {
+        int minRun = minRunLength(MIN_MERGE);
 
-		int i = 0;
-		int j = 0;
-		int k = left;
+        // Sort individual subarrays of size RUN
+        for (int i = 0; i < n; i += minRun) {
+            insertionSort(
+                    arr, i,
+                    Math.min((i + MIN_MERGE - 1), (n - 1)));
+        }
 
-		while (i < leftArryLen && j < rightArrLen) {
-			if (leftArr[i] <= rightArr[j]) {
-				arr[k] = leftArr[i];
-				i++;
-			} else {
-				arr[k] = rightArr[j];
-				j++;
-			}
-			k++;
-		}
+        // Start merging from size
+        // RUN (or 32). It will
+        // merge to form size 64,
+        // then 128, 256 and so on
+        // ....
+        for (int size = minRun; size < n; size = 2 * size) {
 
-		// copy remaining elements of left, if any
-		while (i < leftArryLen) {
-			arr[k] = leftArr[i];
-			k++;
-			i++;
-		}
+            // Pick starting point
+            // of left sub array. We
+            // are going to merge
+            // arr[left..left+size-1]
+            // and arr[left+size, left+2*size-1]
+            // After every merge, we
+            // increase left by 2*size
+            for (int left = 0; left < n; left += 2 * size) {
 
-		// copy remaining element of right, if any
-		while (j < rightArrLen) {
-			arr[k] = rightArr[j];
-			k++;
-			j++;
-		}
-	}
+                // Find ending point of left sub array
+                // mid+1 is starting point of right sub
+                // array
+                int mid = left + size - 1;
+                int right = Math.min((left + 2 * size - 1),
+                        (n - 1));
 
-	public static void timSort(int[] arr) {
-		int length = arr.length;
+                // Merge sub array arr[left.....mid] &
+                // arr[mid+1....right]
+                if (mid < right)
+                    merge(arr, left, mid, right);
+            }
+        }
+    }
 
-		// Sort individual subarrays of size THRESHOLD
-		for (int i = 0; i < length; i += RUN) {
-			// perform insertion sort
-			insertionSort(arr, i, Math.min((i + 31), (length - 1)));
-		}
+    // Utility function to print the Array
+    public static void printArray(int[] arr, int n)
+    {
+        for (int i = 0; i < n; i++) {
+            System.out.print(arr[i] + " ");
+        }
+        System.out.print("\n");
+    }
 
-		for (int size = RUN; size < length; size = 2 * size) {
-			for (int left = 0; left < length; left += 2 * size) {
-				int mid = left + size - 1;
-				int right = Math.min((left + 2 * size - 1), (length - 1));
-				// perform merge sort
-				merge(arr, left, mid, right);
-			}
-		}
-	}
+    /*// Driver code
+    public static void main(String[] args)
+    {
+        int[] arr = { -2, 7,  15,  -14, 0, 15,  0, 7,
+                -7, -4, -13, 5,   8, -14, 12 };
+        int n = arr.length;
+        System.out.println("Given Array is");
+        printArray(arr, n);
 
-	/*public static void main(String[] args) {
-		int[] arr = { 10, 3, 2, 19, 7, 15, 23, 13, 1 };
-		System.out.println(Arrays.toString(arr));
-		timSort(arr);
-		System.out.println(Arrays.toString(arr));
-	}*/
+        timSort(arr, n);
+
+        System.out.println("After Sorting Array is");
+        printArray(arr, n);
+    }*/
 }
+
+
+
